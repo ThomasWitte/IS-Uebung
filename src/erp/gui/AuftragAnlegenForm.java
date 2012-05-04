@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.util.Locale;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -26,7 +27,7 @@ import erp.database.LegoDB;
  * @author Thomas Witte
  *
  */
-public class AuftragAnlegenForm extends JFrame {
+public class AuftragAnlegenForm extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JTextField kdnr_field = new JTextField();
@@ -37,11 +38,11 @@ public class AuftragAnlegenForm extends JFrame {
 	private JButton cancel_button = new JButton("Abbruch");
 	private DefaultTableModel tmodel = null;
 
-	public AuftragAnlegenForm() {
-	
+	public AuftragAnlegenForm(JFrame owner) {
+		super(owner, true);
 		add_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AuftragPosAnlegenForm f = new AuftragPosAnlegenForm(tmodel);
+				AuftragPosAnlegenForm f = new AuftragPosAnlegenForm(AuftragAnlegenForm.this, tmodel);
 				f.setVisible(true);
 			}
 		});
@@ -76,7 +77,8 @@ public class AuftragAnlegenForm extends JFrame {
 					LegoDB legodb = new LegoDB();
 					legodb.createAuftrag(kdnr, kdauftrnr, kdauftrdatum, teileID, farbe, amount);
 				} catch (ParseException ex) {
-					JOptionPane.showMessageDialog(null, "ungültiges Datumsformat", "Fehler beim Parsen des Datums", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "ungültiges Datumsformat; bitte dd.mm.yy verwenden",
+							"Fehler beim Parsen des Datums", JOptionPane.ERROR_MESSAGE);
 					ex.printStackTrace();
 				}
 				dispose();

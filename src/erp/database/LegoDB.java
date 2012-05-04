@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.LinkedList;
 
+import javax.swing.JOptionPane;
+
 /**
  * 
  * @author Thomas Witte
@@ -23,6 +25,8 @@ public class LegoDB {
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e) {
+			JOptionPane.showMessageDialog(null, driver + " konnte nicht gefunden werden",
+					"Fehler beim Verbinden mit der Datenbank", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return null;
 		}
@@ -30,6 +34,8 @@ public class LegoDB {
 		try {
 			con = DriverManager.getConnection(url);
 		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "Läuft die Datenbank " + url + " ?", 
+					"Fehler beim Verbinden mit der Datenbank", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return null;
 		}
@@ -57,6 +63,8 @@ public class LegoDB {
 			}
 
 		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "konnte offene Aufträge nicht laden", 
+					"Fehler beim Datenbankzugriff", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return null;
 		}
@@ -75,12 +83,12 @@ public class LegoDB {
 			rs.next();
 			auftrnr = rs.getInt("AuftrNr") + 1;
 		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "Konnte keine neue Auftragsnummer generieren",
+					"Fehler beim Datenbankzugriff", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return;
 		}
 
-		System.out.println(auftrnr);
-		
 		// Auftrag einfügen
 		try (PreparedStatement ps = con.prepareStatement("insert into auftragsds values(?,?,?,?,?, null, 0, null, null, null, null, null, 0, null, null)")) {
 			ps.setInt(1, auftrnr);
@@ -90,6 +98,8 @@ public class LegoDB {
 			ps.setDate(5, new Date(System.currentTimeMillis()));
 			ps.executeUpdate();
 		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "Konnte Auftrag nicht anlegen; existiert die Kundennummer?",
+					"Fehler beim Datenbankzugriff",	JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return;
 		}
@@ -105,6 +115,9 @@ public class LegoDB {
 				ps.executeUpdate();
 			}
 		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, 
+					"Konnte Auftragsposition nicht anlegen; existieren alle Teile in den gewählten Farben?",
+					"Fehler beim Datenbankzugriff", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 	}

@@ -43,8 +43,9 @@ public class AuftragForm extends JFrame {
 		JMenuItem auftrag_erstellen = new JMenuItem("Auftrag erstellen…");
 		auftrag_erstellen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AuftragAnlegenForm win = new AuftragAnlegenForm();
+				AuftragAnlegenForm win = new AuftragAnlegenForm(AuftragForm.this);
 				win.setVisible(true);
+				updateTable();
 			}
 		});
 		menu_auftraege.add(auftrag_erstellen);
@@ -63,17 +64,9 @@ public class AuftragForm extends JFrame {
 
 		String[] colnames = { "Auftragsnummer", "Kundennummer",
 				"Erfassungsdatum", "Auftragsstatus" };
-		List<Auftrag> auftraege = (new LegoDB()).readOffeneAuftraege();
-
 		tmodel = new DefaultTableModel(colnames, 0);
-		for(Auftrag a : auftraege) {
-			String[] rowData = {
-					"" + a.getAuftrNr(),
-					"" + a.getKdNr(),
-					"" + a.getErfassungsDatum(),
-					"" + a.getAuftrStatus()};
-			tmodel.addRow(rowData);
-		}
+
+		updateTable();
 		table = new JTable(tmodel);
 		JTableHeader header = table.getTableHeader();
 		JPanel panel = new JPanel(new BorderLayout());
@@ -84,5 +77,19 @@ public class AuftragForm extends JFrame {
 		content.add(tab_pane, BorderLayout.CENTER);
 		
 		setTitle("Lego Trailer ERP");
+	}
+	
+	private void updateTable() {
+		List<Auftrag> auftraege = (new LegoDB()).readOffeneAuftraege();
+
+		tmodel.setRowCount(0);
+		for(Auftrag a : auftraege) {
+			String[] rowData = {
+					"" + a.getAuftrNr(),
+					"" + a.getKdNr(),
+					"" + a.getErfassungsDatum(),
+					"" + a.getAuftrStatus()};
+			tmodel.addRow(rowData);
+		}
 	}
 }

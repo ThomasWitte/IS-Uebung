@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -20,7 +20,7 @@ import javax.swing.table.DefaultTableModel;
  * @author Thomas Witte
  *
  */
-public class AuftragPosAnlegenForm extends JFrame {
+public class AuftragPosAnlegenForm extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JTextField teileid = new JTextField();
@@ -28,7 +28,8 @@ public class AuftragPosAnlegenForm extends JFrame {
 	private JComboBox<String> farbe = new JComboBox<String>(combovalues);
 	private JTextField anzahl = new JTextField();
 	
-	public AuftragPosAnlegenForm(final DefaultTableModel tmodel) {
+	public AuftragPosAnlegenForm(JDialog owner, final DefaultTableModel tmodel) {
+		super(owner, true);
 		Container content = getContentPane();
 		content.setLayout(new BorderLayout());
 		
