@@ -17,6 +17,7 @@ import javax.swing.table.JTableHeader;
 
 import java.util.List;
 
+import erp.ctrl.Auftragsverwaltung;
 import erp.database.Auftrag;
 import erp.database.LegoDB;
 
@@ -50,6 +51,31 @@ public class AuftragForm extends JFrame {
 		});
 		menu_auftraege.add(auftrag_erstellen);
 		
+		JMenuItem auftrag_bearbeiten = new JMenuItem("Offene Aufträge bearbeiten");
+		auftrag_bearbeiten.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				List<Auftrag> auftraege = (new LegoDB()).readOffeneAuftraege(0);
+				String resulttext = "Es wurden " + auftraege.size() + " Aufträge bearbeitet.\n\n";
+				String[] stext = {"unbearbeitet", "Fertigungsauftrag", "Fertigung beendet", "Lagerlieferung", "Rechnungsschreibung", "abgeschlossen"};
+				
+				for(Auftrag a : auftraege) {
+					int result = Auftragsverwaltung.auftragBearbeiten(a.getAuftrNr());
+					if(result == 0)
+						resulttext = resulttext + "FEHLER: ";
+					
+					resulttext = resulttext + "Auftragsnr: " + a.getAuftrNr() + 
+							", alter Status: " + a.getAuftrStatus() + " (" + stext[a.getAuftrStatus()] + ")" +
+							", neuer Status: " + result + " (" + stext[result] + ")\n";
+				}
+				
+				updateTable();
+				LogWindow win = new LogWindow(AuftragForm.this, false);
+				win.setText(resulttext);
+				win.setVisible(true);
+			}
+		});
+		menu_auftraege.add(auftrag_bearbeiten);
+		
 		JMenuItem beenden = new JMenuItem("Beenden");
 		beenden.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -80,7 +106,7 @@ public class AuftragForm extends JFrame {
 	}
 	
 	private void updateTable() {
-		List<Auftrag> auftraege = (new LegoDB()).readOffeneAuftraege();
+		List<Auftrag> auftraege = (new LegoDB()).readOffeneAuftraege(3);
 
 		tmodel.setRowCount(0);
 		for(Auftrag a : auftraege) {

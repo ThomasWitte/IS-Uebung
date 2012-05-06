@@ -42,15 +42,16 @@ public class LegoDB {
 		return con;
 	}
 
-	public List<Auftrag> readOffeneAuftraege() {
+	public List<Auftrag> readOffeneAuftraege(int maxstatus) {
 		Connection con = openConnection();
 		List<Auftrag> ret = new LinkedList<Auftrag>();
 
 		try (PreparedStatement ps = con.prepareStatement(
 				"select * " +
 				"from auftragsds " +
-				"where auftrstatus < 4")) {
-
+				"where auftrstatus <= ?")) {
+			ps.setInt(1, maxstatus);
+			
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Auftrag a = new Auftrag();
@@ -72,6 +73,66 @@ public class LegoDB {
 		return ret;
 	}
 
+	public List<Kunde> readKunden() {
+		Connection con = openConnection();
+		List<Kunde> ret = new LinkedList<Kunde>();
+		
+		try (PreparedStatement ps = con.prepareStatement(
+				"select * from kunden")) {
+			
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Kunde k = new Kunde(
+						rs.getInt("kdnr"),
+						rs.getString("kdname"),
+						rs.getString("kdstadt"),
+						rs.getInt("bonitaet"));
+				ret.add(k);
+			}
+			
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "konnte Kunden nicht laden",
+					"Fehler beim Datenbankzugriff", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			return null;
+		}
+		
+		return ret;
+	}
+	
+	public Kunde createKunde(String name, String town, int bonitaet) {
+		Connection con = openConnection();
+		int kdnr = 0;
+		
+		//nächste Kundennummer
+		try (PreparedStatement ps = con.prepareStatement("select max(KdNr) as kdnr from kunden")) {
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			kdnr = rs.getInt("kdnr") + 1;
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "Konnte keine neue Kundennummer generieren",
+					"Fehler beim Datenbankzugriff", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			return null;
+		}
+		
+		//Kunde einfügen
+		try (PreparedStatement ps = con.prepareStatement("insert into kunden values(?,?,?,?)")) {
+			ps.setInt(1, kdnr);
+			ps.setString(2, name);
+			ps.setString(3, town);
+			ps.setInt(4, bonitaet);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null, "Konnte Kunde nicht anlegen",
+					"Fehler beim Datenbankzugriff",	JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			return null;
+		}
+		
+		return new Kunde(kdnr, name, town, bonitaet);
+	}
+	
 	public void createAuftrag(int KdNr, String kdauftrnr, Date kdauftrdatum,
 			String[] teileID, int[] farbe, int[] amount) {
 		Connection con = openConnection();

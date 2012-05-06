@@ -8,9 +8,12 @@ import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.sql.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,6 +23,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import erp.database.Kunde;
 import erp.database.LegoDB;
 
 /**
@@ -30,9 +34,10 @@ import erp.database.LegoDB;
 public class AuftragAnlegenForm extends JDialog {
 	private static final long serialVersionUID = 1L;
 
-	private JTextField kdnr_field = new JTextField();
 	private JTextField kdauftrnr_field = new JTextField();
 	private JTextField kddate_field = new JTextField();
+	private JComboBox<Kunde> kunde = null;
+	private JButton add_kd_button = new JButton("n. Kunde");
 	private JButton add_button = new JButton("Auftragspos. hinzufügen");
 	private JButton create_button = new JButton("Erstellen");
 	private JButton cancel_button = new JButton("Abbruch");
@@ -48,7 +53,7 @@ public class AuftragAnlegenForm extends JDialog {
 		});
 		create_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int kdnr = Integer.parseInt(kdnr_field.getText());
+				int kdnr = ((Kunde) kunde.getSelectedItem()).getKdnr();
 				String kdauftrnr = kdauftrnr_field.getText();
 				try {
 					DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
@@ -89,6 +94,21 @@ public class AuftragAnlegenForm extends JDialog {
 				dispose();
 			}
 		});
+		add_kd_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				KundeAnlegenForm dlg = 
+						new KundeAnlegenForm(AuftragAnlegenForm.this);
+				dlg.setVisible(true);
+				
+				Kunde newkd;
+				if((newkd = dlg.getNewKd()) != null) {
+					kunde.addItem(newkd);
+					kunde.setSelectedItem(newkd);
+				}
+				
+				dlg.dispose();
+			}
+		});
 		
 		Container content = getContentPane();
 		content.setLayout(new GridLayout(2,1));
@@ -99,8 +119,12 @@ public class AuftragAnlegenForm extends JDialog {
 		
 		JPanel fields = new JPanel();
 		fields.setLayout(new GridLayout(3,2));
-		fields.add(new JLabel("Kundennummer:"));
-		fields.add(kdnr_field);
+		fields.add(new JLabel("Kunde:"));
+		
+		List<Kunde> klist = (new LegoDB()).readKunden();
+		kunde = new JComboBox<Kunde>(new Vector<Kunde>(klist));
+		fields.add(kunde);
+		
 		fields.add(new JLabel("Kunden-Auftragsnummer:"));
 		fields.add(kdauftrnr_field);
 		fields.add(new JLabel("Kunden-Auftragsdatum:"));
@@ -110,7 +134,7 @@ public class AuftragAnlegenForm extends JDialog {
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new GridLayout(1,5));
 		buttons.add(add_button);
-		buttons.add(new JPanel());
+		buttons.add(add_kd_button);
 		buttons.add(new JPanel());
 		buttons.add(create_button);
 		buttons.add(cancel_button);
